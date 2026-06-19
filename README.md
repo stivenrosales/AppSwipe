@@ -1,31 +1,50 @@
-# AppSwipe
+<div align="center">
 
-A fast, minimal, **native macOS window switcher**. It replaces ⌘-Tab with a clean, glassy list of your windows — so you switch to *windows*, not just apps.
+# 🪟 AppSwipe
 
-> **Beta** · Free & open source. A Pro version may come later, but the core stays open.
+**A fast, minimal, native macOS window switcher.**
 
-## Why
+Replace ⌘-Tab with a clean, glassy list of your *windows* — not just apps.
 
-macOS's built-in ⌘-Tab switches between *apps*. AppSwipe switches between *windows*, in true most‑recently‑used order — so flipping between your last two windows is instant, even when they belong to the same app. No live thumbnails (those require private APIs); just a crisp **icon + title** list that feels native and gets out of your way.
+[![macOS](https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![Swift](https://img.shields.io/badge/Swift-6-FA7343?style=flat&logo=swift&logoColor=white)](https://swift.org)
+[![SwiftUI](https://img.shields.io/badge/SwiftUI-0A84FF?style=flat&logo=swift&logoColor=white)](https://developer.apple.com/xcode/swiftui/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=flat)](LICENSE)
+![Status](https://img.shields.io/badge/status-beta-yellow?style=flat)
+![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat)
 
-## Features
+<br/>
 
-- **⌘-Tab to switch windows** — hold ⌘, tap Tab to cycle, release to select. ⌘⇧Tab goes backwards.
-- **True MRU order** — alternate between your two last windows like ⌘-Tab, regardless of app.
-- **Native Liquid Glass** — uses macOS Tahoe's `NSGlassEffectView`.
-- **Instant quick‑switch** — a fast tap‑and‑release switches with no UI; hold to reveal the list.
-- **Mouse or keyboard** selection, with hover feedback.
-- **Live preview** in Preferences — change size, font and accent color and see it update instantly.
-- **Menu‑bar item** with Preferences and Quit.
-- **100% public macOS APIs** for window data + Accessibility — no Screen Recording permission needed.
+<img src="docs/assets/preferences.jpeg" width="430" alt="AppSwipe — Preferences with a live, glassy preview" />
 
-## Requirements
+</div>
 
-- **macOS 26 (Tahoe)** — uses native Liquid Glass APIs.
-- The Swift toolchain (Xcode or Command Line Tools) to build.
-- **Accessibility** permission (the app guides you through it on first launch).
+---
 
-## Install (beta — build from source)
+## 💡 Why
+
+macOS's built-in ⌘-Tab switches between *apps*. **AppSwipe switches between *windows***, in true most‑recently‑used order — so flipping between your last two windows is instant, even when they belong to the same app. No live thumbnails (those need private APIs); just a crisp **icon + title** list that feels native and gets out of your way.
+
+## ✨ Features
+
+- ⌨️ **⌘-Tab to switch windows** — hold ⌘, tap Tab to cycle, release to select (⌘⇧Tab goes back).
+- 🔁 **True MRU order** — alternate between your two last windows like ⌘-Tab, regardless of app.
+- 🪟 **Native Liquid Glass** — built on macOS Tahoe's `NSGlassEffectView`.
+- ⚡ **Instant quick-switch** — a fast tap-and-release switches with no UI; hold to reveal the list.
+- 🖱️ **Mouse or keyboard** selection, with hover feedback.
+- 🎨 **Live preview** in Preferences — change size, font and accent color and see it update instantly.
+- 📊 **Menu-bar item** with Preferences and Quit.
+- 🔒 **100% public macOS APIs** for window data + Accessibility — no Screen Recording needed.
+
+## 🎬 Demo
+
+<div align="center">
+<img src="docs/assets/preferences.jpeg" width="500" alt="AppSwipe Preferences and live preview" />
+</div>
+
+> 📹 A motion demo of the ⌘-Tab switcher in action is coming soon.
+
+## 📦 Install (beta — build from source)
 
 ```bash
 git clone https://github.com/stivenrosales/AppSwipe.git
@@ -35,9 +54,9 @@ cd AppSwipe
 
 `run.sh` builds a release, installs **AppSwipe.app** into `/Applications`, signs it with a stable local certificate (so the Accessibility permission survives rebuilds), and launches it. Then grant **Accessibility** in *System Settings → Privacy & Security → Accessibility*.
 
-> ⚠️ AppSwipe is signed with a *local self‑signed* certificate, not an Apple Developer ID. macOS Gatekeeper may warn on first open — right‑click the app → **Open** to confirm. A notarized signed release will come later.
+> ⚠️ AppSwipe is signed with a *local self-signed* certificate, not an Apple Developer ID. macOS Gatekeeper may warn on first open — right-click the app → **Open** to confirm. A notarized release will come later.
 
-## Building & developing
+## 🛠️ Building & developing
 
 This project uses **Swift Package Manager**, driven through a `Makefile`:
 
@@ -47,20 +66,24 @@ make test      # run the domain test suite (Swift Testing)
 make release   # release build
 ```
 
-### macOS Tahoe build note
+<details>
+<summary><b>macOS Tahoe build note</b></summary>
 
 On macOS 26 **Command Line Tools**, plain `swift build` fails to compile the package manifest (a symbol mismatch in `libPackageDescription`, `SwiftVersion` vs `SwiftLanguageMode`). The `Makefile` + `scripts/swift-wrapper.sh` work around this transparently — **always build via `make`, never `swift` directly.**
+</details>
 
-## Architecture
+## 🏗️ Architecture
 
-Clean and layered, with a pure, fully‑tested core:
+Clean and layered, with a pure, fully-tested core:
 
-- **`AppSwipeCore`** — pure domain: window model, MRU tracker, selection logic. No AppKit/SwiftUI. Unit‑tested.
-- **`AppSwipe`** (executable) — System adapters (window enumeration, activation, the ⌘-Tab `CGEventTap`, permissions) + SwiftUI presentation (panel, list, preferences) + the composition root.
+| Layer | What |
+|---|---|
+| **`AppSwipeCore`** | Pure domain: window model, MRU tracker, selection logic. No AppKit/SwiftUI. Unit-tested. |
+| **`AppSwipe`** | System adapters (window enumeration, activation, the ⌘-Tab `CGEventTap`, permissions) + SwiftUI presentation + composition root. |
 
 The domain depends on protocols (ports); the macOS adapters implement them — so the switching logic is tested without ever opening a window.
 
-## Support the creator ☕
+## ☕ Support the creator
 
 AppSwipe is free. If it makes your day a little smoother, you can buy me a coffee:
 
@@ -68,19 +91,20 @@ AppSwipe is free. If it makes your day a little smoother, you can buy me a coffe
 
 Every coffee fuels the next feature. Thank you! 🙌
 
-## Roadmap
+## 🗺️ Roadmap
 
-- Type‑to‑filter the window list
-- Close a window straight from the switcher
-- Launch at login
-- Configurable shortcut
+- [ ] Type-to-filter the window list
+- [ ] Close a window straight from the switcher
+- [ ] Launch at login
+- [ ] Configurable shortcut
+- [ ] Notarized signed release
 
-## License
+## 📄 License
 
-[GPL‑3.0](LICENSE) © Stiven Rosales.
+[GPL-3.0](LICENSE) © Stiven Rosales — free to use, study, modify and share. Forks must stay open source under the same license.
 
-You're free to use, study, modify and share AppSwipe. Forks and derivatives must remain open source under the same license.
+---
 
-## Disclaimer
-
-Beta software, provided as‑is. AppSwipe uses the Accessibility API to read and activate your windows — nothing ever leaves your machine.
+<div align="center">
+<sub>Beta software, provided as-is. AppSwipe uses the Accessibility API to read and activate your windows — nothing ever leaves your machine.</sub>
+</div>
