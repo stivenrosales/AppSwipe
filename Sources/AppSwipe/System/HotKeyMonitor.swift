@@ -40,7 +40,10 @@ import CoreGraphics
 ///   session tap rides on that permission and needs no separate Input-Monitoring grant.
 /// - Note: Not thread-safe. Create, `start()`, and `stop()` on the main thread — the tap is added
 ///   to the current (main) run loop and its callback fires there.
-public final class HotKeyMonitor {
+/// `@unchecked Sendable`: every access happens on the main thread (the tap is added to the main
+/// run loop, and the gesture closures are dispatched back onto the main queue), so capturing
+/// `self` in the dispatched work is safe even though the compiler can't prove it.
+public final class HotKeyMonitor: @unchecked Sendable {
 
     // MARK: - Public callbacks
 
@@ -171,18 +174,25 @@ public final class HotKeyMonitor {
             // Cmd+Tab: start (or advance) the gesture and swallow the Tab so it never reaches the
             // active app AND so the native macOS app switcher does not appear — consuming the
             // keyDown at the head of the session tap pre-empts the Dock's Cmd+Tab handling.
+            //
+            // CRITICAL: dispatch the work asynchronously and return *immediately*. Doing it
+            // synchronously here would run window enumeration inside the callback; enumeration hits
+            // the Accessibility API, which can block when the target app is busy (e.g. a browser
+            // rendering a link hover). A slow callback makes macOS disable the tap by timeout and
+            // DROP the next event — usually the Cmd release that drives the quick, no-UI switch.
+            // That was the intermittent "fast switch stops working" bug. Keep this callback trivial.
             active = true
-            if flags.contains(.maskShift) {
-                onPrevious?()
-            } else {
-                onNext?()
+            let goBackwards = flags.contains(.maskShift)
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if goBackwards { self.onPrevious?() } else { self.onNext?() }
             }
             return nil  // consume
 
         case kVK_Escape where active:
             // Esc aborts a live gesture and is swallowed so it does not also hit the active app.
             active = false
-            onCancel?()
+            DispatchQueue.main.async { [weak self] in self?.onCancel?() }
             return nil  // consume
 
         default:
@@ -195,10 +205,11 @@ public final class HotKeyMonitor {
     /// A gesture is committed the moment Option is released while it was in flight. We only read
     /// the flags here — the event itself is always passed through by the caller.
     private func handleFlagsChanged(_ event: CGEvent) {
-        // Gesture commits the moment Command is released while it was in flight.
+        // Gesture commits the moment Command is released while it was in flight. Dispatch async for
+        // the same reason as the key handler: keep the tap callback fast so it never times out.
         guard active, !event.flags.contains(.maskCommand) else { return }
         active = false
-        onConfirm?()
+        DispatchQueue.main.async { [weak self] in self?.onConfirm?() }
     }
 }
 
