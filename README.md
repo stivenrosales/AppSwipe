@@ -39,10 +39,12 @@ macOS's built-in ⌘-Tab switches between *apps*. **AppSwipe switches between *w
 ## 🎬 Demo
 
 <div align="center">
-<img src="docs/assets/preferences.jpeg" width="500" alt="AppSwipe Preferences and live preview" />
-</div>
 
-> 📹 A motion demo of the ⌘-Tab switcher in action is coming soon.
+<img src="docs/assets/demo.gif" width="300" alt="AppSwipe in action — ⌘-Tab window switching with live preview" />
+
+<sub>⌘-Tab switching, live preview and accent colors in action.</sub>
+
+</div>
 
 ## 📦 Install (beta — build from source)
 
