@@ -47,6 +47,19 @@ public struct CGWindowEnumerator: WindowProvider {
             guard let appName = entry[kCGWindowOwnerName] as? String, !appName.isEmpty else {
                 return nil
             }
+
+            // Discard non-window surfaces. Tooltips and status/URL bubbles are real layer-0 windows
+            // but tiny — e.g. Chrome's link-URL bubble is only ~22pt tall — and zero-size helper
+            // windows exist too. Left in, that URL bubble shows up as the FRONTMOST window and
+            // shifts the MRU selection by one, breaking the quick-switch whenever the pointer hovers
+            // a browser link. A real window is comfortably larger than this threshold.
+            guard let bounds = entry[kCGWindowBounds] as? [String: Any],
+                  let width = bounds["Width"] as? Double,
+                  let height = bounds["Height"] as? Double,
+                  width >= 60, height >= 60 else {
+                return nil
+            }
+
             return RawWindow(id: windowID, appName: appName, pid: pid)
         }
 
